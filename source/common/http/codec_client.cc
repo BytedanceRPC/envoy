@@ -10,10 +10,12 @@
 #include "common/http/exception.h"
 #include "common/http/http1/codec_impl.h"
 #include "common/http/http2/codec_impl.h"
-#include "common/http/http3/quic_codec_factory.h"
-#include "common/http/http3/well_known_names.h"
 #include "common/http/status.h"
 #include "common/http/utility.h"
+
+#ifdef ENVOY_ENABLE_QUIC
+#include "common/quic/envoy_quic_client_session.h"
+#endif
 
 namespace Envoy {
 namespace Http {
@@ -182,10 +184,8 @@ CodecClientProd::CodecClientProd(Type type, Network::ClientConnectionPtr&& conne
     break;
   }
   case Type::HTTP3: {
-    codec_ = std::unique_ptr<ClientConnection>(
-        Config::Utility::getAndCheckFactoryByName<Http::QuicHttpClientConnectionFactory>(
-            Http::QuicCodecNames::get().Quiche)
-            .createQuicClientConnection(*connection_, *this));
+    codec_ = std::make_unique<Quic::QuicHttpClientConnectionImpl>(
+      dynamic_cast<Quic::EnvoyQuicClientSession&>(connection), callbacks);
     break;
   }
   }

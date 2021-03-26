@@ -24,27 +24,5 @@ PersistentQuicInfoImpl::PersistentQuicInfoImpl(
           std::make_unique<quic::QuicCryptoClientConfig>(std::make_unique<EnvoyQuicProofVerifier>(
               stats_scope, getConfig(transport_socket_factory), time_source))) {}
 
-std::unique_ptr<Network::ClientConnection>
-QuicClientConnectionFactoryImpl::createQuicNetworkConnection(
-    Http::PersistentQuicInfo& info, Event::Dispatcher& dispatcher,
-    Network::Address::InstanceConstSharedPtr server_addr,
-    Network::Address::InstanceConstSharedPtr local_addr) {
-  // This flag fix a QUICHE issue which may crash Envoy during connection close.
-  SetQuicReloadableFlag(quic_single_ack_in_packet2, true);
-  PersistentQuicInfoImpl* info_impl = reinterpret_cast<PersistentQuicInfoImpl*>(&info);
-
-  auto connection = std::make_unique<EnvoyQuicClientConnection>(
-      quic::QuicUtils::CreateRandomConnectionId(), server_addr, info_impl->conn_helper_,
-      info_impl->alarm_factory_, quic::ParsedQuicVersionVector{info_impl->supported_versions_[0]},
-      local_addr, dispatcher, nullptr);
-  auto ret = std::make_unique<EnvoyQuicClientSession>(
-      quic_config_, info_impl->supported_versions_, std::move(connection), info_impl->server_id_,
-      info_impl->crypto_config_.get(), &push_promise_index_, dispatcher, 0);
-  ret->Initialize();
-  return ret;
-}
-
-REGISTER_FACTORY(QuicClientConnectionFactoryImpl, Http::QuicClientConnectionFactory);
-
 } // namespace Quic
 } // namespace Envoy

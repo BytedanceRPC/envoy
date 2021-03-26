@@ -22,16 +22,6 @@ envoy_cc_library(
 )
 
 envoy_cc_library(
-    name = "quic_codec_factory_lib",
-    hdrs = ["quic_codec_factory.h"],
-    deps = [
-        "//include/envoy/config:typed_config_interface",
-        "//include/envoy/http:codec_interface",
-        "//include/envoy/network:connection_interface",
-    ],
-)
-
-envoy_cc_library(
     name = "quic_client_connection_factory_lib",
     hdrs = ["quic_client_connection_factory.h"],
     deps = [
@@ -40,10 +30,4 @@ envoy_cc_library(
         "//include/envoy/ssl:context_config_interface",
         "@envoy_api//envoy/config/core/v3:pkg_cc_proto",
     ],
-)
-
-envoy_cc_library(
-    name = "well_known_names",
-    hdrs = ["well_known_names.h"],
-    deps = ["//source/common/singleton:const_singleton"],
 )
